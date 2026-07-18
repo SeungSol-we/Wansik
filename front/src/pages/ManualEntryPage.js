@@ -5,10 +5,10 @@ import { PageHeader } from '../components/layout/PageHeader';
 import { useCreateManualMeal } from '../hooks/useMeals';
 
 const MEAL_TYPES = [
-  { value: 'breakfast', label: '아침' },
-  { value: 'lunch', label: '점심' },
-  { value: 'dinner', label: '저녁' },
-  { value: 'snack', label: '간식' },
+  { value: 'BREAKFAST', label: '아침' },
+  { value: 'LUNCH', label: '점심' },
+  { value: 'DINNER', label: '저녁' },
+  { value: 'SNACK', label: '간식' },
 ];
 
 let nextId = 1;
@@ -16,7 +16,7 @@ let nextId = 1;
 export default function ManualEntryPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const initialMealType = location.state?.mealType || 'snack';
+  const initialMealType = location.state?.mealType || 'SNACK';
   const fromFailedRecognition = location.state?.reason === 'AI_SERVICE_UNAVAILABLE';
 
   const [mealType, setMealType] = useState(initialMealType);
@@ -35,7 +35,7 @@ export default function ManualEntryPage() {
       eatenAt: new Date().toISOString(),
       items: validItems.map((it) => ({ food_name_raw: it.name.trim(), amount: it.amount })),
     });
-    navigate(`/meals/${meal?.meal_id || meal?.id || 'demo-meal'}/guide`);
+    navigate(`/meals/${meal._id}/guide`);
   };
 
   return (

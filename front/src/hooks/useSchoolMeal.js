@@ -1,22 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createMealFromSchoolMeal, fetchSchoolMeal, skipMeal } from '../api/schoolMeals';
-import { withFallback } from '../api/withFallback';
-import { MOCK_SCHOOL_MEAL } from '../api/mockData';
 import { useUserStore } from '../store/useUserStore';
 
-export function useSchoolMeal(date) {
+export function useSchoolMeal(date, mealType = 'LUNCH') {
   const schoolCode = useUserStore((s) => s.schoolCode);
   return useQuery({
-    queryKey: ['school-meal', schoolCode, date],
-    queryFn: () => withFallback(fetchSchoolMeal({ schoolCode, date }), MOCK_SCHOOL_MEAL),
+    queryKey: ['school-meal', schoolCode, date, mealType],
+    queryFn: () => fetchSchoolMeal({ schoolCode, date, mealType }),
+    enabled: Boolean(schoolCode),
   });
 }
 
 export function useConfirmSchoolMeal() {
   const queryClient = useQueryClient();
-  const userId = useUserStore((s) => s.userId);
   return useMutation({
-    mutationFn: ({ date, mealType }) => createMealFromSchoolMeal({ userId, date, mealType }),
+    mutationFn: ({ date, mealType }) => createMealFromSchoolMeal({ date, mealType }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['meals'] }),
   });
 }

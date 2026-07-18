@@ -1,6 +1,8 @@
 import { apiClient } from './client';
 
 // GET /api/v1/users/{user_id}/health-profile
+// Throws {error_code: 'HEALTH_PROFILE_NOT_SET'} (422) if never saved — callers
+// should treat that as "empty profile", not a real error.
 export async function fetchHealthProfile({ userId }) {
   const { data } = await apiClient.get(`/users/${userId}/health-profile`);
   return data;

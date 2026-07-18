@@ -38,13 +38,13 @@ export default function RecognitionResultPage() {
   const handleConfirm = async () => {
     const items = candidates
       .filter((c) => c.included)
-      .map((c) => ({ food_id: c.matchedFoodId, food_name_raw: c.name, amount: '1인분' }));
+      .map((c) => ({ matched_food_id: c.matchedFoodId, food_name_raw: c.name, amount: '1인분' }));
     const meal = await confirmPhotoMeal.mutateAsync({
       mealType,
       eatenAt: new Date().toISOString(),
       items,
     });
-    navigate(`/meals/${meal?.meal_id || meal?.id || 'demo-meal'}/guide`);
+    navigate(`/meals/${meal._id}/guide`);
   };
 
   const noCandidates = candidates.length === 0;

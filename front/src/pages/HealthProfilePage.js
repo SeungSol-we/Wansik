@@ -6,11 +6,11 @@ import { useUserStore } from '../store/useUserStore';
 
 const ALLERGY_OPTIONS = ['땅콩', '새우', '계란', '우유', '밀', '대두', '갑각류', '고등어', '복숭아'];
 const CONDITION_OPTIONS = ['비염', '아토피', '위염', '천식', '당뇨'];
+// backend/app/models/health_profile.py — NONE/VEGETARIAN/HALAL 세 가지뿐.
 const DIET_TYPES = [
-  { value: 'none', label: '제한 없음' },
-  { value: 'vegetarian', label: '채식' },
-  { value: 'vegan', label: '비건' },
-  { value: 'halal', label: '할랄' },
+  { value: 'NONE', label: '제한 없음' },
+  { value: 'VEGETARIAN', label: '채식' },
+  { value: 'HALAL', label: '할랄' },
 ];
 
 function ChipToggleGroup({ options, selected, onToggle }) {
@@ -31,13 +31,13 @@ function ChipToggleGroup({ options, selected, onToggle }) {
 }
 
 export default function HealthProfilePage() {
-  const { nickname, schoolCode, grade, classNo, setProfile } = useUserStore();
+  const { nickname, schoolCode, grade, classNo } = useUserStore();
   const { data, isLoading } = useHealthProfile();
   const saveProfile = useSaveHealthProfile();
 
   const [allergies, setAllergies] = useState([]);
   const [conditions, setConditions] = useState([]);
-  const [dietType, setDietType] = useState('none');
+  const [dietType, setDietType] = useState('NONE');
   const [customAllergy, setCustomAllergy] = useState('');
   const [saved, setSaved] = useState(false);
 
@@ -45,7 +45,7 @@ export default function HealthProfilePage() {
     if (data) {
       setAllergies(data.allergies || []);
       setConditions(data.conditions || []);
-      setDietType(data.diet_type || 'none');
+      setDietType(data.diet_type || 'NONE');
     }
   }, [data]);
 
@@ -77,48 +77,23 @@ export default function HealthProfilePage() {
       <ScreenBody>
         <div className="panel panel-cream">
           <h2 className="section-title">기본 정보</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>
-              닉네임
-              <input
-                value={nickname}
-                onChange={(e) => setProfile({ nickname: e.target.value })}
-                style={{ display: 'block', width: '100%', marginTop: 4, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
-              />
-            </label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label style={{ flex: 2, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>
-                학교 코드
-                <input
-                  value={schoolCode}
-                  placeholder="예: SC12345"
-                  onChange={(e) => setProfile({ schoolCode: e.target.value })}
-                  style={{ display: 'block', width: '100%', marginTop: 4, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
-                />
-              </label>
-              <label style={{ flex: 1, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>
-                학년
-                <input
-                  type="number"
-                  min={1}
-                  max={3}
-                  value={grade}
-                  onChange={(e) => setProfile({ grade: Number(e.target.value) })}
-                  style={{ display: 'block', width: '100%', marginTop: 4, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
-                />
-              </label>
-              <label style={{ flex: 1, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>
-                반
-                <input
-                  type="number"
-                  min={1}
-                  value={classNo}
-                  onChange={(e) => setProfile({ classNo: Number(e.target.value) })}
-                  style={{ display: 'block', width: '100%', marginTop: 4, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
-                />
-              </label>
-            </div>
-          </div>
+          {/* 가입(온보딩) 시 한 번만 입력되는 정보 — 서버에 수정 API가 없어
+              여기서는 조회만 가능하다 (backend/app/routers 에 계정 정보
+              수정 엔드포인트가 아직 없음). */}
+          <ul>
+            <li className="row-item">
+              <span className="row-label">닉네임</span>
+              <span>{nickname}</span>
+            </li>
+            <li className="row-item">
+              <span className="row-label">학교 코드</span>
+              <span>{schoolCode || '-'}</span>
+            </li>
+            <li className="row-item">
+              <span className="row-label">학년 / 반</span>
+              <span>{grade}학년 {classNo}반</span>
+            </li>
+          </ul>
         </div>
 
         <div className="panel panel-cream">
@@ -149,7 +124,7 @@ export default function HealthProfilePage() {
           <ChipToggleGroup
             options={DIET_TYPES.map((d) => d.label)}
             selected={[DIET_TYPES.find((d) => d.value === dietType)?.label]}
-            onToggle={(label) => setDietType(DIET_TYPES.find((d) => d.label === label)?.value || 'none')}
+            onToggle={(label) => setDietType(DIET_TYPES.find((d) => d.label === label)?.value || 'NONE')}
           />
         </div>
 

@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { OnboardingGate } from './components/OnboardingGate';
 import HomePage from './pages/HomePage';
 import SchoolMealPage from './pages/SchoolMealPage';
 import PhotoCapturePage from './pages/PhotoCapturePage';
@@ -13,16 +14,18 @@ function App() {
     <BrowserRouter>
       <div className="app-root">
         <div className="app-shell">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/school-meal" element={<SchoolMealPage />} />
-            <Route path="/capture" element={<PhotoCapturePage />} />
-            <Route path="/recognition" element={<RecognitionResultPage />} />
-            <Route path="/manual-entry" element={<ManualEntryPage />} />
-            <Route path="/meals/:mealId/guide" element={<MealGuidePage />} />
-            <Route path="/report" element={<WeeklyReportPage />} />
-            <Route path="/profile" element={<HealthProfilePage />} />
-          </Routes>
+          <OnboardingGate>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/school-meal" element={<SchoolMealPage />} />
+              <Route path="/capture" element={<PhotoCapturePage />} />
+              <Route path="/recognition" element={<RecognitionResultPage />} />
+              <Route path="/manual-entry" element={<ManualEntryPage />} />
+              <Route path="/meals/:mealId/guide" element={<MealGuidePage />} />
+              <Route path="/report" element={<WeeklyReportPage />} />
+              <Route path="/profile" element={<HealthProfilePage />} />
+            </Routes>
+          </OnboardingGate>
         </div>
       </div>
     </BrowserRouter>

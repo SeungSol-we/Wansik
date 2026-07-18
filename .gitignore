@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+front/node_modules/
+front/build/
+
+# AI service weights (large binaries, not checked in)
+ai-service/app/weights/*.pt
+ai-service/app/weights/*.onnx
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

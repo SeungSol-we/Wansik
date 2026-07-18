@@ -5,10 +5,10 @@ import { PageHeader } from '../components/layout/PageHeader';
 import { useRecognizePhoto } from '../hooks/useMeals';
 
 const MEAL_TYPES = [
-  { value: 'breakfast', label: '아침' },
-  { value: 'lunch', label: '점심/급식 외' },
-  { value: 'dinner', label: '저녁' },
-  { value: 'snack', label: '간식' },
+  { value: 'BREAKFAST', label: '아침' },
+  { value: 'LUNCH', label: '점심/급식 외' },
+  { value: 'DINNER', label: '저녁' },
+  { value: 'SNACK', label: '간식' },
 ];
 
 export default function PhotoCapturePage() {
@@ -16,7 +16,7 @@ export default function PhotoCapturePage() {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [mealType, setMealType] = useState('snack');
+  const [mealType, setMealType] = useState('SNACK');
   const recognize = useRecognizePhoto();
 
   const handleFile = (e) => {
@@ -29,7 +29,9 @@ export default function PhotoCapturePage() {
   const handleSubmit = async () => {
     if (!file) return;
     try {
-      const result = await recognize.mutateAsync({ file, mealType });
+      // mealType isn't sent here — recognition only classifies the food in
+      // the photo; meal_type is attached later at confirm time.
+      const result = await recognize.mutateAsync({ file });
       navigate('/recognition', { state: { result, mealType, previewUrl } });
     } catch (err) {
       navigate('/manual-entry', { state: { mealType, reason: 'AI_SERVICE_UNAVAILABLE' } });

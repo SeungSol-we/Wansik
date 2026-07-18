@@ -1,23 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchWeeklyReport, generateWeeklyReport } from '../api/analysis';
-import { withFallback } from '../api/withFallback';
-import { MOCK_WEEKLY_REPORT } from '../api/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchWeeklyReport } from '../api/analysis';
 import { useUserStore } from '../store/useUserStore';
 
 export function useWeeklyReport(periodStart) {
   const userId = useUserStore((s) => s.userId);
   return useQuery({
     queryKey: ['weekly-report', userId, periodStart],
-    queryFn: () => withFallback(fetchWeeklyReport({ userId, periodStart }), MOCK_WEEKLY_REPORT),
+    queryFn: () =>
+      fetchWeeklyReport({ userId, periodStart }).catch((err) => {
+        // No meals logged in this window yet — a real empty state, not a bug.
+        if (err.error_code === 'REPORT_NOT_FOUND') return null;
+        throw err;
+      }),
     enabled: Boolean(userId),
-  });
-}
-
-export function useGenerateWeeklyReport() {
-  const queryClient = useQueryClient();
-  const userId = useUserStore((s) => s.userId);
-  return useMutation({
-    mutationFn: ({ periodStart, periodEnd }) => generateWeeklyReport({ userId, periodStart, periodEnd }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['weekly-report', userId] }),
   });
 }

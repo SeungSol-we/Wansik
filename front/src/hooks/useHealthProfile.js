@@ -1,14 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchHealthProfile, saveHealthProfile } from '../api/healthProfile';
-import { withFallback } from '../api/withFallback';
-import { MOCK_HEALTH_PROFILE } from '../api/mockData';
 import { useUserStore } from '../store/useUserStore';
+
+const EMPTY_PROFILE = { allergies: [], diet_type: 'NONE', conditions: [] };
 
 export function useHealthProfile() {
   const userId = useUserStore((s) => s.userId);
   return useQuery({
     queryKey: ['health-profile', userId],
-    queryFn: () => withFallback(fetchHealthProfile({ userId }), MOCK_HEALTH_PROFILE),
+    queryFn: () =>
+      fetchHealthProfile({ userId }).catch((err) => {
+        // Not an error from the user's point of view — they just haven't
+        // filled out a profile yet.
+        if (err.error_code === 'HEALTH_PROFILE_NOT_SET') return EMPTY_PROFILE;
+        throw err;
+      }),
     enabled: Boolean(userId),
   });
 }

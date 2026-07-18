@@ -1,22 +1,29 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Phase 1 ships without a signup/login screen yet (see 기획서 §3 화면 범위),
-// so we keep a locally-persisted demo identity to pass as user_id / school_code
-// on every API call. Swap this out once the auth screens land.
-function makeDemoId() {
-  return 'demo-' + Math.random().toString(36).slice(2, 10);
-}
-
+// The backend (backend/app/routers/auth.py) requires a real login_id/password
+// account — there's no separate signup/login screen in the 8-screen scope yet
+// (see 기획서 §3), so OnboardingGate creates a device-local account once
+// (random login_id/password the user never sees or types) and stores it here
+// so we can silently re-login when the 60-minute access token expires
+// (backend has no refresh-token flow — see backend/app/core/security.py).
 export const useUserStore = create(
   persist(
     (set) => ({
-      userId: makeDemoId(),
+      accessToken: null,
+      userId: null,
+      loginId: null,
+      password: null,
+
       nickname: '식습관러',
       schoolCode: '',
       grade: 1,
       classNo: 1,
+
+      setAuth: ({ accessToken, userId }) => set({ accessToken, userId }),
+      setAccount: ({ loginId, password }) => set({ loginId, password }),
       setProfile: (partial) => set(partial),
+      logout: () => set({ accessToken: null, userId: null, loginId: null, password: null }),
     }),
     { name: 'diet-care-user' }
   )

@@ -4,9 +4,9 @@ import { Screen, ScreenBody } from '../components/layout/Screen';
 import { PageHeader } from '../components/layout/PageHeader';
 import { FoodIcon } from '../assets/illustrations/FoodIcon';
 import { FortuneGhost } from '../assets/illustrations/GhostMascot';
-import { useConfirmSchoolMeal, useSchoolMeal, useSkipMeal } from '../hooks/useSchoolMeal';
+import { useConfirmSchoolMeal, useSchoolMeal } from '../hooks/useSchoolMeal';
 
-const FOOD_ICON_BY_INDEX = ['soup', 'rice', 'vegetable', 'fruit', 'porridge'];
+const FOOD_ICON_CYCLE = ['soup', 'rice', 'vegetable', 'fruit', 'porridge'];
 const SKIP_REASONS = ['오늘은 급식을 안 먹었어요', '다른 음식을 먹었어요', '식사를 걸렀어요'];
 
 function todayISO() {
@@ -17,17 +17,18 @@ export default function SchoolMealPage() {
   const navigate = useNavigate();
   const [reasonOpen, setReasonOpen] = useState(false);
   const date = todayISO();
-  const { data, isLoading } = useSchoolMeal(date);
+  const { data, isLoading, isError, error } = useSchoolMeal(date, 'LUNCH');
   const confirmMeal = useConfirmSchoolMeal();
-  const skipMeal = useSkipMeal();
 
   const handleEaten = async () => {
-    const meal = await confirmMeal.mutateAsync({ date, mealType: 'lunch' });
-    navigate(`/meals/${meal?.meal_id || meal?.id || 'demo-meal'}/guide`);
+    const meal = await confirmMeal.mutateAsync({ date, mealType: 'LUNCH' });
+    navigate(`/meals/${meal._id}/guide`);
   };
 
-  const handleSkip = async (reason) => {
-    await skipMeal.mutateAsync({ mealId: 'today-lunch', reason }).catch(() => {});
+  // 이 시점에는 아직 실제 식사 기록(meal)이 없어 스킵 대상 meal_id가 없다 —
+  // 백엔드의 PATCH /meals/{id}/skip 은 이미 생성된 기록을 스킵 처리하는
+  // 용도라, "안 먹음"은 서버에 남기지 않고 로컬에서만 안내하고 홈으로 보낸다.
+  const handleSkip = () => {
     navigate('/');
   };
 
@@ -41,6 +42,8 @@ export default function SchoolMealPage() {
           <div className="panel panel-cream center-col" style={{ padding: 40 }}>
             <span>급식 정보를 불러오는 중…</span>
           </div>
+        ) : isError ? (
+          <div className="status-banner warn">{error?.message || '급식 정보를 불러오지 못했어요.'}</div>
         ) : !data?.available ? (
           <div className="panel panel-cream center-col" style={{ gap: 14, padding: 28 }}>
             <FortuneGhost size={110} />
@@ -65,13 +68,14 @@ export default function SchoolMealPage() {
               <h2 className="section-title">오늘의 메뉴</h2>
               <ul>
                 {data.items.map((item, i) => (
-                  <li key={item.food_id || item.name} className="row-item">
+                  <li key={item.food_name_raw} className="row-item">
                     <span className="row-label">
                       <span className="food-icon-badge" style={{ width: 36, height: 36 }}>
-                        <FoodIcon type={FOOD_ICON_BY_INDEX[i % FOOD_ICON_BY_INDEX.length]} size={20} />
+                        <FoodIcon type={FOOD_ICON_CYCLE[i % FOOD_ICON_CYCLE.length]} size={20} />
                       </span>
-                      {item.name}
+                      {item.food_name_raw}
                     </span>
+                    <span className="pill pill-outline">{item.category}</span>
                   </li>
                 ))}
               </ul>
@@ -91,7 +95,7 @@ export default function SchoolMealPage() {
                 <p style={{ fontWeight: 700, marginBottom: 10, fontSize: 14 }}>어떤 상황이었나요?</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {SKIP_REASONS.map((reason) => (
-                    <button key={reason} className="btn btn-outline" onClick={() => handleSkip(reason)}>
+                    <button key={reason} className="btn btn-outline" onClick={handleSkip}>
                       {reason}
                     </button>
                   ))}
