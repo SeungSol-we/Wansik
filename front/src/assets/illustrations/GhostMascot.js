@@ -5,13 +5,13 @@ export function FortuneGhost({ size = 150, className }) {
   return (
     <svg width={size} height={size * 1.05} viewBox="0 0 160 168" className={className}>
       <WitchHat x={80} y={-6} scale={0.62} />
-      <GhostArm side="left" pose="down" />
       <GhostBody />
       <GhostFace mood="happy" />
+      <GhostArm side="right" pose="up" />
       {/* magnifying glass held up near the face */}
-      <g transform="translate(118 96) rotate(18)">
-        <circle cx="0" cy="0" r="15" fill="rgba(255,255,255,0.35)" stroke={GHOST_COLORS.outline} strokeWidth="3" />
-        <line x1="11" y1="11" x2="24" y2="24" stroke={GHOST_COLORS.outline} strokeWidth="4" strokeLinecap="round" />
+      <g transform="translate(126 78) rotate(18)">
+        <circle cx="0" cy="0" r="14" fill="rgba(255,255,255,0.35)" stroke={GHOST_COLORS.outline} strokeWidth="3" />
+        <line x1="10" y1="10" x2="22" y2="22" stroke={GHOST_COLORS.outline} strokeWidth="4" strokeLinecap="round" />
       </g>
     </svg>
   );

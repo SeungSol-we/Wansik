@@ -86,6 +86,7 @@ export default function RecognitionResultPage() {
                         onChange={(e) => updateName(c.id, e.target.value)}
                         style={{
                           flex: 1,
+                          minWidth: 0,
                           border: '1.5px solid var(--cream-border-strong)',
                           borderRadius: 10,
                           padding: '8px 10px',

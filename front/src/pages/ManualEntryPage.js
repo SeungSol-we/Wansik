@@ -71,13 +71,13 @@ export default function ManualEntryPage() {
                   value={it.name}
                   placeholder="음식 이름 (예: 떡볶이)"
                   onChange={(e) => updateItem(it.id, { name: e.target.value })}
-                  style={{ flex: 2, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
+                  style={{ flex: 2, minWidth: 0, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
                 />
                 <input
                   value={it.amount}
                   placeholder="양"
                   onChange={(e) => updateItem(it.id, { amount: e.target.value })}
-                  style={{ flex: 1, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
+                  style={{ flex: 1, minWidth: 0, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
                 />
                 <button type="button" className="tap-target" onClick={() => removeItem(it.id)} aria-label="삭제" style={{ color: 'var(--red-tag)', fontSize: 18, padding: '0 6px' }}>
                   ×

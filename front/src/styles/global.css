@@ -160,7 +160,6 @@ img {
   margin-bottom: 12px;
 }
 
-.screen--dark .section-title,
 .panel-navy .section-title {
   color: var(--white);
 }
@@ -368,8 +367,7 @@ img {
   color: var(--ink);
 }
 
-.panel-navy .food-cell,
-.screen--dark .food-cell {
+.panel-navy .food-cell {
   color: var(--cream-text);
 }
 
