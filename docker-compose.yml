@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build: ./frontend
+    ports: ["3000:3000"]
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    depends_on: [backend]
+
+  backend:
+    build: ./backend
+    ports: ["8000:8000"]
+    env_file: .env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/diet_care
+      AI_SERVICE_URL: http://ai-service:8100
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [mongo, ai-service, redis]
+    volumes:
+      - ./backend:/app
+
+  ai-service:
+    build: ./ai-service
+    ports: ["8100:8100"]
+    volumes:
+      - ./ai-service:/app
+    # GPU 사용 시 아래 주석 해제 (8장 TBD: 자체 서버 vs 클라우드 GPU 인스턴스)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           capabilities: [gpu]
+
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: ["mongo_data:/data/db"]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+volumes:
+  mongo_data:
