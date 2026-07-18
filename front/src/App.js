@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { OnboardingGate } from './components/OnboardingGate';
+import { AuthGate } from './components/AuthGate';
 import HomePage from './pages/HomePage';
 import SchoolMealPage from './pages/SchoolMealPage';
 import PhotoCapturePage from './pages/PhotoCapturePage';
@@ -14,7 +14,7 @@ function App() {
     <BrowserRouter>
       <div className="app-root">
         <div className="app-shell">
-          <OnboardingGate>
+          <AuthGate>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/school-meal" element={<SchoolMealPage />} />
@@ -25,7 +25,7 @@ function App() {
               <Route path="/report" element={<WeeklyReportPage />} />
               <Route path="/profile" element={<HealthProfilePage />} />
             </Routes>
-          </OnboardingGate>
+          </AuthGate>
         </div>
       </div>
     </BrowserRouter>

@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Screen, ScreenBody } from '../components/layout/Screen';
 import { BottomNav } from '../components/layout/BottomNav';
 import { useHealthProfile, useSaveHealthProfile } from '../hooks/useHealthProfile';
 import { useUserStore } from '../store/useUserStore';
+import { logout } from '../api/authSession';
 
-const ALLERGY_OPTIONS = ['땅콩', '새우', '계란', '우유', '밀', '대두', '갑각류', '고등어', '복숭아'];
+// backend/app/batch/seed_foods.py 에 실제로 쓰인 allergens 문자열과 정확히
+// 맞춰야 한다 — guide_service.py 는 문자열 완전일치(set intersection)로 비교하기
+// 때문에, "계란"/"새우"처럼 seed 데이터의 "달걀"/"갑각류"와 다른 표현을 쓰면
+// 알레르기를 선택해도 절대 경고가 뜨지 않는다.
+const ALLERGY_OPTIONS = ['땅콩', '갑각류', '달걀', '우유', '밀', '대두', '돼지고기', '닭고기', '소고기', '고등어', '복숭아'];
 const CONDITION_OPTIONS = ['비염', '아토피', '위염', '천식', '당뇨'];
 // backend/app/models/health_profile.py — NONE/VEGETARIAN/HALAL 세 가지뿐.
 const DIET_TYPES = [
@@ -34,6 +40,7 @@ export default function HealthProfilePage() {
   const { nickname, schoolName, grade, classNo } = useUserStore();
   const { data, isLoading } = useHealthProfile();
   const saveProfile = useSaveHealthProfile();
+  const queryClient = useQueryClient();
 
   const [allergies, setAllergies] = useState([]);
   const [conditions, setConditions] = useState([]);
@@ -64,6 +71,12 @@ export default function HealthProfilePage() {
     await saveProfile.mutateAsync({ allergies, dietType, conditions });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleLogout = () => {
+    if (!window.confirm('로그아웃할까요?')) return;
+    logout();
+    queryClient.clear();
   };
 
   return (
@@ -103,6 +116,17 @@ export default function HealthProfilePage() {
           ) : (
             <>
               <ChipToggleGroup options={ALLERGY_OPTIONS} selected={allergies} onToggle={toggleAllergy} />
+              {allergies.filter((a) => !ALLERGY_OPTIONS.includes(a)).length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                  {allergies
+                    .filter((a) => !ALLERGY_OPTIONS.includes(a))
+                    .map((a) => (
+                      <button key={a} type="button" className="pill pill-gold" onClick={() => toggleAllergy(a)}>
+                        {a} ×
+                      </button>
+                    ))}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <input
                   value={customAllergy}
@@ -135,6 +159,10 @@ export default function HealthProfilePage() {
 
         <button className="btn btn-primary btn-block" disabled={saveProfile.isPending} onClick={handleSave}>
           {saveProfile.isPending ? '저장하는 중…' : saved ? '저장 완료!' : '저장하기'}
+        </button>
+
+        <button type="button" className="link-quiet" style={{ alignSelf: 'center' }} onClick={handleLogout}>
+          로그아웃
         </button>
       </ScreenBody>
 

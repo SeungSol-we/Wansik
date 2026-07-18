@@ -1,30 +1,30 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// The backend (backend/app/routers/auth.py) requires a real login_id/password
-// account — there's no separate signup/login screen in the 8-screen scope yet
-// (see 기획서 §3), so OnboardingGate creates a device-local account once
-// (random login_id/password the user never sees or types) and stores it here
-// so we can silently re-login when the 60-minute access token expires
-// (backend has no refresh-token flow — see backend/app/core/security.py).
+// Real account state backed by backend/app/routers/auth.py (login_id/password,
+// signup/login/me). No password is ever stored client-side — the 60-minute
+// access token (backend/app/core/security.py) is persisted so a page reload
+// doesn't force a re-login, but once it expires the user just logs in again.
+const INITIAL_STATE = {
+  accessToken: null,
+  userId: null,
+  loginId: null,
+
+  nickname: '',
+  schoolCode: '',
+  schoolName: '',
+  grade: 1,
+  classNo: 1,
+};
+
 export const useUserStore = create(
   persist(
     (set) => ({
-      accessToken: null,
-      userId: null,
-      loginId: null,
-      password: null,
-
-      nickname: '식습관러',
-      schoolCode: '',
-      schoolName: '',
-      grade: 1,
-      classNo: 1,
+      ...INITIAL_STATE,
 
       setAuth: ({ accessToken, userId }) => set({ accessToken, userId }),
-      setAccount: ({ loginId, password }) => set({ loginId, password }),
       setProfile: (partial) => set(partial),
-      logout: () => set({ accessToken: null, userId: null, loginId: null, password: null }),
+      logout: () => set({ ...INITIAL_STATE }),
     }),
     { name: 'diet-care-user' }
   )

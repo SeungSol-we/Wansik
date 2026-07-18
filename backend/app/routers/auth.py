@@ -2,12 +2,12 @@
 6.1 인증
 POST /api/v1/auth/signup, POST /api/v1/auth/login -> JWT(access) 발급
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
-from app.core.errors import duplicate_user, invalid_credentials
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.errors import duplicate_user, invalid_credentials, user_not_found
+from app.core.security import create_access_token, get_current_user_id, hash_password, verify_password
 from app.repositories import user_repo
-from app.schemas.auth import LoginRequest, SignupRequest, TokenResponse
+from app.schemas.auth import LoginRequest, MeResponse, SignupRequest, TokenResponse
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -33,6 +33,7 @@ async def signup(payload: SignupRequest):
         login_id=payload.login_id,
         hashed_password=hash_password(payload.password),
         school_code=payload.school_code,
+        school_name=payload.school_name,
         grade=payload.grade,
         class_no=payload.class_no,
         nickname=payload.nickname,
@@ -49,3 +50,21 @@ async def login(payload: LoginRequest):
 
     token = create_access_token(user["_id"])
     return TokenResponse(access_token=token, user_id=user["_id"])
+
+
+# 로그인만으로는 닉네임/학교 같은 프로필 정보를 알 수 없어(TokenResponse는
+# user_id만 반환) 프론트가 로그인 직후 자기 계정 정보를 조회할 수 있어야 한다.
+@router.get("/me", response_model=MeResponse)
+async def get_me(current_user_id: str = Depends(get_current_user_id)):
+    user = await user_repo.get_by_id(current_user_id)
+    if not user:
+        raise user_not_found()
+    return MeResponse(
+        user_id=user["_id"],
+        login_id=user["login_id"],
+        nickname=user["nickname"],
+        school_code=user["school_code"],
+        school_name=user.get("school_name", ""),
+        grade=user["grade"],
+        class_no=user["class_no"],
+    )

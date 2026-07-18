@@ -60,6 +60,12 @@ export function BottomNav() {
   return (
     <nav
       style={{
+        // .screen's children don't stretch by default, so on short pages
+        // (e.g. the weekly-report empty state) this nav would otherwise sit
+        // right after the content instead of pinned to the viewport bottom.
+        // marginTop: auto pushes it down when there's slack; sticky still
+        // keeps it pinned once the page is tall enough to scroll.
+        marginTop: 'auto',
         position: 'sticky',
         bottom: 0,
         left: 0,

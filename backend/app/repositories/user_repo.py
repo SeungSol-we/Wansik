@@ -18,10 +18,12 @@ async def create_user(
     grade: int,
     class_no: int,
     nickname: str,
+    school_name: str = "",
 ) -> UserDocument:
     doc = UserDocument(
         _id=new_id("u"),
         school_code=school_code,
+        school_name=school_name,
         grade=grade,
         class_no=class_no,
         nickname=nickname,

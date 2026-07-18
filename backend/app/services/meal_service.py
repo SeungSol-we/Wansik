@@ -96,10 +96,17 @@ async def confirm_photo_meal(
 ) -> MealDocument:
     items: list[MealItem] = []
     for i, raw in enumerate(raw_items):
+        # AI 인식이 매칭하지 못했거나(신뢰도 낮음) 사용자가 이름을 직접 고친
+        # 경우 matched_food_id 가 비어있을 수 있다 — 이때도 수기입력과 동일하게
+        # 이름 기반 fallback 매칭을 해줘야 알레르기/가이드 규칙엔진이 정상 동작한다.
+        food_id = raw.get("matched_food_id")
+        if not food_id:
+            food = await food_repo.find_best_match_by_name(raw["food_name_raw"])
+            food_id = food["_id"] if food else None
         items.append(
             MealItem(
                 meal_item_id=f"mi_{i:02d}",
-                food_id=raw.get("matched_food_id"),
+                food_id=food_id,
                 food_name_raw=raw["food_name_raw"],
                 amount=raw.get("amount"),
             )

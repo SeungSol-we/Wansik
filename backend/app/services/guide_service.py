@@ -8,6 +8,24 @@ from app.repositories import food_repo, health_profile_repo, school_meal_repo
 # 5.3: 채소 -> 단백질 -> 탄수화물 -> 국물/후식
 CATEGORY_ORDER = ["채소", "단백질", "탄수화물", "국물", "후식"]
 
+# health_profiles.conditions 에 표시한 지병에 안 좋은 nutrition_rules 태그
+# (5.1.5) 매핑. 의료 진단이 아니라 일반적인 생활 습관 조언 수준이며, 프론트
+# 문구에도 "의료 자문을 대체하지 않는다"는 안내가 함께 붙는다.
+CONDITION_RISK_TAGS: dict[str, list[str]] = {
+    "위염": ["매운맛", "튀김", "고지방", "고나트륨"],
+    "당뇨": ["고당분"],
+    "아토피": ["고당분", "유제품", "고지방"],
+    "천식": ["튀김", "고지방"],
+    "비염": ["유제품"],
+}
+CONDITION_SYMPTOM: dict[str, str] = {
+    "위염": "위 점막 자극으로 위염 증상 악화 가능",
+    "당뇨": "혈당이 급격히 오를 수 있음",
+    "아토피": "피부 트러블 악화 가능",
+    "천식": "염증 반응 유발 가능",
+    "비염": "점액 분비 증가로 코막힘 악화 가능",
+}
+
 
 async def build_meal_guide(user_id: str, items: list[MealItem]) -> MealGuide:
     """
@@ -19,6 +37,7 @@ async def build_meal_guide(user_id: str, items: list[MealItem]) -> MealGuide:
     """
     profile = await health_profile_repo.get_by_user_id(user_id)
     allergies = set(profile["allergies"]) if profile else set()
+    conditions = set(profile["conditions"]) if profile else set()
 
     food_ids = [item.food_id for item in items if item.food_id]
     foods_by_id = {f["_id"]: f for f in await food_repo.get_many_by_ids(food_ids)}
@@ -32,6 +51,7 @@ async def build_meal_guide(user_id: str, items: list[MealItem]) -> MealGuide:
         if not food:
             continue
 
+        food_tags = set(food.get("tags", []))
         food_allergens = set(food.get("allergens", []))
         matched_allergens = food_allergens & allergies
 
@@ -45,17 +65,32 @@ async def build_meal_guide(user_id: str, items: list[MealItem]) -> MealGuide:
                 )
             )
             high_severity_triggered = True
-            continue  # 알레르기 항목은 태그 매칭 생략 (③ "알레르기 아닌 항목은" 조건)
+        else:
+            # 이미 알레르기로 HIGH 경고가 뜬 음식엔 같은 음식에 대한 일반
+            # 영양 팁까지 겹쳐 보여주지 않는다 (③ "알레르기 아닌 항목은" 조건).
+            for tag in food_tags:
+                rule = rules.get(tag)
+                if rule:
+                    cautions.append(
+                        Caution(
+                            food_name=f"{item.food_name_raw}({tag})",
+                            possible_symptom=rule.predicted_symptom,
+                            recommendation=rule.recommendation,
+                            severity=Severity(rule.severity),
+                        )
+                    )
 
-        for tag in food.get("tags", []):
-            rule = rules.get(tag)
-            if rule:
+        # 지병 주의사항은 알레르기 매칭 여부와 무관하게 항상 따로 확인한다 —
+        # 사용자가 명시적으로 등록한 지병이라 일반 영양 팁보다 우선순위가 높다.
+        for condition in conditions:
+            risky_tags = food_tags & set(CONDITION_RISK_TAGS.get(condition, []))
+            if risky_tags:
                 cautions.append(
                     Caution(
-                        food_name=f"{item.food_name_raw}({tag})",
-                        possible_symptom=rule.predicted_symptom,
-                        recommendation=rule.recommendation,
-                        severity=Severity(rule.severity),
+                        food_name=f"{item.food_name_raw}({condition})",
+                        possible_symptom=CONDITION_SYMPTOM.get(condition, f"{condition} 증상 악화 가능"),
+                        recommendation=f"{condition}이(가) 있다면 {', '.join(sorted(risky_tags))} 섭취에 주의해주세요.",
+                        severity=Severity.MEDIUM,
                     )
                 )
 

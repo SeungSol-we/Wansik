@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 class UserDocument(BaseModel):
     id: str = Field(alias="_id")
     school_code: str
+    school_name: str = ""
     grade: int
     class_no: int
     nickname: str

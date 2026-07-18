@@ -91,9 +91,17 @@ def _illustration_key_for_tag(tag: str) -> str:
 
 
 async def get_weekly_report(user_id: str, period_start: date) -> dict | None:
+    """
+    항상 최신 meals 기준으로 다시 계산한다. 예전엔 그 주에 한 번 생성된 리포트를
+    영구 캐시로 반환했는데, 그러면 주 초반에 매운 음식을 먹어 리포트가 한 번
+    생성된 뒤로는 이후 무엇을 먹든 화면이 그 스냅샷에 멈춰 있는 문제가 있었다
+    (예: 나중에 튀김/고당분 위주로 먹어도 계속 "매운맛" 결과만 보임).
+    일요일 00:10 배치(app/batch/generate_weekly_report.py)가 만드는 스냅샷은
+    그대로 두되, 사용자가 직접 조회할 때는 그 주가 끝나기 전까지 항상 실시간
+    집계를 보여준다.
+    """
     period_end = period_start + timedelta(days=6)
-    existing = await analysis_repo.get_latest_by_user(user_id, period_start)
-    if existing:
-        return existing
     doc = await generate_weekly_report_for_user(user_id, period_start, period_end)
-    return doc.model_dump(by_alias=True) if doc else None
+    if doc:
+        return doc.model_dump(by_alias=True)
+    return await analysis_repo.get_latest_by_user(user_id, period_start)

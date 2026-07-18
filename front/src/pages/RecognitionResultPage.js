@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Screen, ScreenBody } from '../components/layout/Screen';
 import { PageHeader } from '../components/layout/PageHeader';
+import { Mascot } from '../components/Mascot';
 import { useConfirmPhotoMeal } from '../hooks/useMeals';
 
 export default function RecognitionResultPage() {
@@ -32,8 +33,11 @@ export default function RecognitionResultPage() {
   const toggleIncluded = (id) =>
     setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, included: !c.included } : c)));
 
+  // If the user corrects the recognized name, the AI's original food match no
+  // longer applies — clear it so the backend re-resolves by the new name
+  // (see meal_service.confirm_photo_meal's fallback matching).
   const updateName = (id, name) =>
-    setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, name, lowConfidence: false } : c)));
+    setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, name, lowConfidence: false, matchedFoodId: null } : c)));
 
   const handleConfirm = async () => {
     const items = candidates
@@ -60,6 +64,7 @@ export default function RecognitionResultPage() {
 
         {noCandidates ? (
           <div className="panel panel-cream center-col" style={{ gap: 12, padding: 28 }}>
+            <Mascot type="thinking" size={100} />
             <p style={{ fontWeight: 700 }}>이 사진은 알아보기 어려웠어요</p>
             <p style={{ fontSize: 13, color: 'var(--ink-soft)', textAlign: 'center' }}>
               괜찮아요, 대신 직접 입력해볼까요?
@@ -72,37 +77,93 @@ export default function RecognitionResultPage() {
           <>
             <div className="panel panel-cream">
               <h2 className="section-title">이 음식이 맞나요?</h2>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p style={{ fontSize: 12, color: 'var(--ink-soft)', textAlign: 'center', marginTop: -6, marginBottom: 4 }}>
+                이름이 틀렸다면 눌러서 고치고, 뺄 음식은 제외해주세요
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {candidates.map((c) => (
-                  <li
+                  <div
                     key={c.id}
-                    className="row-item"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, borderTop: 'none', paddingTop: 0 }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 12px',
+                      borderRadius: 14,
+                      border: `1.5px solid ${c.included ? 'var(--cream-border-strong)' : 'var(--cream-border)'}`,
+                      background: c.included ? 'var(--white)' : 'var(--cream-panel-alt)',
+                      opacity: c.included ? 1 : 0.55,
+                      transition: 'opacity 0.15s ease',
+                    }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <input type="checkbox" checked={c.included} onChange={() => toggleIncluded(c.id)} />
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        background: 'var(--cream-panel-alt)',
+                        border: '1.5px solid var(--cream-border-strong)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 3v8a2 2 0 0 0 2 2v8M6 3v6M8 3v6" stroke="var(--purple-primary)" strokeWidth="1.6" strokeLinecap="round" />
+                        <path d="M17 3c-1.5 0-3 1.5-3 4s1 4 1 4v8" stroke="var(--purple-primary)" strokeWidth="1.6" strokeLinecap="round" />
+                      </svg>
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <input
                         value={c.name}
                         onChange={(e) => updateName(c.id, e.target.value)}
+                        disabled={!c.included}
                         style={{
-                          flex: 1,
-                          minWidth: 0,
-                          border: '1.5px solid var(--cream-border-strong)',
-                          borderRadius: 10,
-                          padding: '8px 10px',
-                          fontSize: 14,
-                          background: c.included ? 'var(--white)' : 'transparent',
+                          width: '100%',
+                          border: 'none',
+                          borderBottom: '1.5px solid transparent',
+                          background: 'transparent',
+                          padding: '2px 0',
+                          fontSize: 14.5,
+                          fontWeight: 700,
+                          color: 'var(--ink)',
                         }}
+                        onFocus={(e) => (e.target.style.borderBottomColor = 'var(--purple-primary-soft)')}
+                        onBlur={(e) => (e.target.style.borderBottomColor = 'transparent')}
                       />
+                      {c.lowConfidence && c.included && (
+                        <span className="pill pill-red" style={{ marginTop: 4, fontSize: 11, padding: '2px 8px' }}>
+                          확신이 낮아요 · 이름을 확인해주세요
+                        </span>
+                      )}
                     </div>
-                    {c.lowConfidence && (
-                      <span className="status-banner warn" style={{ alignSelf: 'flex-start' }}>
-                        확신이 낮아요 · 이름을 확인해주세요
-                      </span>
-                    )}
-                  </li>
+
+                    <button
+                      type="button"
+                      className="tap-target"
+                      onClick={() => toggleIncluded(c.id)}
+                      aria-label={c.included ? '제외하기' : '다시 포함하기'}
+                      style={{
+                        flexShrink: 0,
+                        width: 30,
+                        height: 30,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: `1.5px solid ${c.included ? 'var(--red-tag)' : 'var(--green-tag)'}`,
+                        color: c.included ? 'var(--red-tag)' : 'var(--green-tag)',
+                        fontSize: 16,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {c.included ? '×' : '+'}
+                    </button>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
 
             <button

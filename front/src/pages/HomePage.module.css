@@ -5,36 +5,6 @@
   gap: 10px;
 }
 
-.tableRow {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.miniCard {
-  width: 38px;
-  height: 52px;
-  border-radius: 8px;
-  background: linear-gradient(160deg, #6b5ca5 0%, #4a3f80 100%);
-  border: 1.5px solid #d4b877;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(45, 35, 80, 0.2);
-}
-
-.crystalDot {
-  position: absolute;
-  right: 26px;
-  bottom: 6px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #efe3ff, #8a72cf 70%, #5c4a9e);
-  box-shadow: 0 0 12px rgba(139, 114, 207, 0.7);
-}
-
 .quickActions {
   display: flex;
   flex-direction: column;

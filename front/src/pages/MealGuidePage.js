@@ -3,11 +3,21 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Screen, ScreenBody } from '../components/layout/Screen';
 import { PageHeader } from '../components/layout/PageHeader';
 import { TarotFrame, TarotCardBack } from '../assets/illustrations/TarotCard';
-import { HurtingGhost, TinyWizardGhost } from '../assets/illustrations/GhostMascot';
+import { Mascot } from '../components/Mascot';
+import { FoodRecommendationGrid } from '../components/FoodRecommendationGrid';
 import { MoonStars } from '../assets/illustrations/Decorations';
 import { useEatingOrder, useMealGuide } from '../hooks/useMeals';
+import { getRecommendationForTag } from '../data/foodRecommendations';
+import { mascotForSymptom } from '../utils/symptomMascot';
 
 const SEVERITY_LABEL = { HIGH: '꼭 확인하세요', MEDIUM: '가볍게 참고하세요', LOW: '참고만 하세요' };
+
+// guide_service.py 는 태그 기반 caution 의 food_name 을 "김치찌개(매운맛)" 형태로
+// 만든다 — 그 안의 태그를 뽑아 실제 추천 음식/이유에 연결한다.
+function extractTag(foodName) {
+  const match = /\(([^)]+)\)\s*$/.exec(foodName || '');
+  return match ? match[1] : null;
+}
 
 export default function MealGuidePage() {
   const { mealId } = useParams();
@@ -24,6 +34,11 @@ export default function MealGuidePage() {
   const unclassified = orderData?.unclassified || [];
   const primary = cautions[0];
   const hasHighAlert = cautions.some((c) => c.severity === 'HIGH');
+  const recommendedFoods = primary ? getRecommendationForTag(extractTag(primary.food_name)) : null;
+  const awaitingCardPick = cautions.length > 0 && pickedCard === null;
+  // 카드를 아직 안 골랐거나 로딩/에러 중엔 "확인했어요"로 바로 나가버릴 수
+  // 있어서 안 보이게 한다 — 결과를 실제로 본 다음에만 나갈 수 있어야 한다.
+  const showConfirmButton = !isLoading && !guideError && !awaitingCardPick;
 
   return (
     <Screen theme="dark">
@@ -34,7 +49,7 @@ export default function MealGuidePage() {
           <p className="eyebrow">가이드를 불러오는 중…</p>
         ) : guideError ? (
           <div className="status-banner warn">가이드를 불러오지 못했어요.</div>
-        ) : cautions.length > 0 && pickedCard === null ? (
+        ) : awaitingCardPick ? (
           <div className="center-col" style={{ gap: 20, padding: '18px 0 10px' }}>
             <p className="page-subtitle">카드를 선택하면 오늘의 식습관을 알려드려요</p>
             <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
@@ -48,7 +63,7 @@ export default function MealGuidePage() {
           <>
             {cautions.length === 0 ? (
               <div className="panel panel-navy center-col" style={{ gap: 10, padding: 28 }}>
-                <TinyWizardGhost size={80} />
+                <Mascot type="cheer" size={100} />
                 <p style={{ fontWeight: 700 }}>특별히 주의할 점은 없어요</p>
                 <p style={{ fontSize: 13, color: 'var(--cream-text-dim)', textAlign: 'center' }}>
                   오늘도 균형 잡힌 식사를 했어요. 잘하고 있어요!
@@ -64,7 +79,7 @@ export default function MealGuidePage() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 12, alignItems: 'stretch' }}>
                   <TarotFrame label={primary.food_name}>
-                    <HurtingGhost size={92} />
+                    <Mascot type={mascotForSymptom(primary.possible_symptom)} size={100} />
                   </TarotFrame>
 
                   <div className="panel panel-navy">
@@ -82,12 +97,19 @@ export default function MealGuidePage() {
                 </div>
 
                 <div className="panel panel-navy" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <TinyWizardGhost size={64} />
+                  <Mascot type="cheer" size={64} />
                   <div>
                     <p className="eyebrow" style={{ textAlign: 'left', marginBottom: 4 }}>오늘의 조언</p>
                     <p style={{ fontSize: 13.5, lineHeight: 1.6 }}>{primary.recommendation}</p>
                   </div>
                 </div>
+
+                {recommendedFoods && (
+                  <div className="panel panel-navy">
+                    <h2 className="section-title" style={{ color: 'var(--white)' }}>추천 음식</h2>
+                    <FoodRecommendationGrid items={recommendedFoods} dark />
+                  </div>
+                )}
 
                 {cautions.length > 1 && (
                   <div className="panel panel-navy">
@@ -142,9 +164,11 @@ export default function MealGuidePage() {
           </>
         )}
 
-        <button className="btn btn-gold btn-block" onClick={() => navigate('/')}>
-          확인했어요
-        </button>
+        {showConfirmButton && (
+          <button className="btn btn-gold btn-block" onClick={() => navigate('/')}>
+            확인했어요
+          </button>
+        )}
       </ScreenBody>
     </Screen>
   );

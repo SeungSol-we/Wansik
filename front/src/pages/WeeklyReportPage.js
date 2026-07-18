@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Screen, ScreenBody } from '../components/layout/Screen';
 import { BottomNav } from '../components/layout/BottomNav';
-import { CrystalBallGhost, ConditionGhost, TinyWizardGhost } from '../assets/illustrations/GhostMascot';
+import { Mascot } from '../components/Mascot';
 import { MoonStars, StringLights } from '../assets/illustrations/Decorations';
 import { useWeeklyReport } from '../hooks/useWeeklyReport';
+import { mondayOfThisWeek } from '../utils/date';
+import { mascotForSymptom } from '../utils/symptomMascot';
 
 // 백엔드 AnalysisReportResponse 에는 테마 제목/추천 습관/문구 같은 필드가 없다
 // (summary_text, illustration_key, findings[] 뿐 — backend/app/schemas/analysis.py).
@@ -28,24 +30,11 @@ const TAG_TIP = {
 };
 const DEFAULT_TIP = '골고루, 규칙적으로 먹는 습관을 만들어봐요.';
 
-function conditionGhostType(predictedSymptom) {
-  if (predictedSymptom.includes('피부')) return 'skin';
-  if (predictedSymptom.includes('변비') || predictedSymptom.includes('붓기')) return 'constipation';
-  return 'stomach';
-}
-
 function formatRange(start, end) {
   if (!start || !end) return '';
   const [, sm, sd] = start.split('-');
   const [, em, ed] = end.split('-');
   return `${Number(sm)}.${Number(sd)} - ${Number(em)}.${Number(ed)}`;
-}
-
-function mondayOfThisWeek() {
-  const now = new Date();
-  const day = (now.getDay() + 6) % 7;
-  now.setDate(now.getDate() - day);
-  return now.toISOString().slice(0, 10);
 }
 
 export default function WeeklyReportPage() {
@@ -63,7 +52,7 @@ export default function WeeklyReportPage() {
           {data ? formatRange(data.period_start, data.period_end) : '이번 주'}
         </h1>
         <div className="center-col" style={{ margin: '4px 0 6px' }}>
-          <CrystalBallGhost size={150} className="float" />
+          <Mascot type="tarot" size={140} className="float" />
         </div>
       </div>
 
@@ -74,7 +63,7 @@ export default function WeeklyReportPage() {
           <div className="status-banner warn">운세를 불러오지 못했어요. 잠시 후 다시 시도해주세요.</div>
         ) : !data ? (
           <div className="panel panel-navy center-col" style={{ gap: 12, padding: 28 }}>
-            <TinyWizardGhost size={90} />
+            <Mascot type="thinking" size={100} />
             <p style={{ fontWeight: 700 }}>아직 이번 주 기록이 없어요</p>
             <p style={{ fontSize: 13, color: 'var(--cream-text-dim)', textAlign: 'center' }}>
               식사를 기록하면 이번 주 운세를 볼 수 있어요.
@@ -115,7 +104,7 @@ export default function WeeklyReportPage() {
                 <div className="food-grid">
                   {data.findings.slice(0, 3).map((f) => (
                     <div key={f.tag} className="food-cell">
-                      <ConditionGhost type={conditionGhostType(f.predicted_symptom)} size={58} />
+                      <Mascot type={mascotForSymptom(f.predicted_symptom)} size={58} />
                       {f.predicted_symptom}
                     </div>
                   ))}

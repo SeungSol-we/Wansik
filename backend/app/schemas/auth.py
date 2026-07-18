@@ -5,6 +5,7 @@ class SignupRequest(BaseModel):
     login_id: str = Field(min_length=4, max_length=50)
     password: str = Field(min_length=8, max_length=100)
     school_code: str
+    school_name: str = ""
     grade: int
     class_no: int
     nickname: str
@@ -21,3 +22,13 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user_id: str
+
+
+class MeResponse(BaseModel):
+    user_id: str
+    login_id: str
+    nickname: str
+    school_code: str
+    school_name: str = ""
+    grade: int
+    class_no: int

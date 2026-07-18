@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Screen, ScreenBody } from '../components/layout/Screen';
 import { PageHeader } from '../components/layout/PageHeader';
 import { FoodIcon } from '../assets/illustrations/FoodIcon';
-import { FortuneGhost } from '../assets/illustrations/GhostMascot';
+import { Mascot } from '../components/Mascot';
 import { useConfirmSchoolMeal, useSchoolMeal } from '../hooks/useSchoolMeal';
 
 const FOOD_ICON_CYCLE = ['soup', 'rice', 'vegetable', 'fruit', 'porridge'];
@@ -46,7 +46,7 @@ export default function SchoolMealPage() {
           <div className="status-banner warn">{error?.message || '급식 정보를 불러오지 못했어요.'}</div>
         ) : !data?.available ? (
           <div className="panel panel-cream center-col" style={{ gap: 14, padding: 28 }}>
-            <FortuneGhost size={110} />
+            <Mascot type="thinking" size={110} />
             <p style={{ textAlign: 'center', fontWeight: 700 }}>오늘은 급식이 없어요</p>
             <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--ink-soft)' }}>
               방학이거나 급식이 제공되지 않는 날일 수 있어요.

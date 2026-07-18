@@ -139,11 +139,13 @@ img {
   background: var(--cream-panel);
   border: 1.5px solid var(--cream-border);
   box-shadow: var(--shadow-soft);
+  color: var(--ink);
 }
 
 .panel-cream-alt {
   background: var(--cream-panel-alt);
   border: 1.5px solid var(--cream-border-strong);
+  color: var(--ink);
 }
 
 .panel-navy {
