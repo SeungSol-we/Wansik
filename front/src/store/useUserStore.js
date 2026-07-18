@@ -17,6 +17,7 @@ export const useUserStore = create(
 
       nickname: '식습관러',
       schoolCode: '',
+      schoolName: '',
       grade: 1,
       classNo: 1,
 

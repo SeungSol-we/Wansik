@@ -22,12 +22,12 @@ export async function relogin() {
   return data;
 }
 
-export async function bootstrapNewAccount({ nickname, schoolCode, grade, classNo, guardianConsent }) {
+export async function bootstrapNewAccount({ nickname, schoolCode, schoolName, grade, classNo, guardianConsent }) {
   const { loginId, password } = randomCredentials();
   const data = await apiSignup({ loginId, password, schoolCode, grade, classNo, nickname, guardianConsent });
   useUserStore.getState().setAccount({ loginId, password });
   useUserStore.getState().setAuth({ accessToken: data.access_token, userId: data.user_id });
-  useUserStore.getState().setProfile({ nickname, schoolCode, grade, classNo });
+  useUserStore.getState().setProfile({ nickname, schoolCode, schoolName, grade, classNo });
   setAuthToken(data.access_token);
   return data;
 }

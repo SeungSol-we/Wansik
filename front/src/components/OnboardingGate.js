@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Screen, ScreenBody } from './layout/Screen';
+import { SchoolSearchField } from './SchoolSearchField';
 import { FortuneGhost } from '../assets/illustrations/GhostMascot';
 import { useUserStore } from '../store/useUserStore';
 import { bootstrapNewAccount, hydrateAuthFromStore } from '../api/authSession';
@@ -11,10 +12,10 @@ import { bootstrapNewAccount, hydrateAuthFromStore } from '../api/authSession';
 // needs (닉네임/학교/학년/반 + 보호자 동의) and create a device-local account
 // behind the scenes. Swap this for a real onboarding flow once designed.
 export function OnboardingGate({ children }) {
-  const { accessToken, nickname: storedNickname, schoolCode: storedSchoolCode, grade: storedGrade, classNo: storedClassNo } = useUserStore();
+  const { accessToken, nickname: storedNickname, grade: storedGrade, classNo: storedClassNo } = useUserStore();
   const [ready, setReady] = useState(Boolean(accessToken));
   const [nickname, setNickname] = useState(storedNickname);
-  const [schoolCode, setSchoolCode] = useState(storedSchoolCode);
+  const [school, setSchool] = useState(null);
   const [grade, setGrade] = useState(storedGrade);
   const [classNo, setClassNo] = useState(storedClassNo);
   const [consent, setConsent] = useState(false);
@@ -27,7 +28,7 @@ export function OnboardingGate({ children }) {
 
   if (ready) return children;
 
-  const canSubmit = nickname.trim() && schoolCode.trim() && grade && classNo && consent && !submitting;
+  const canSubmit = nickname.trim() && school && grade && classNo && consent && !submitting;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +38,8 @@ export function OnboardingGate({ children }) {
     try {
       await bootstrapNewAccount({
         nickname: nickname.trim(),
-        schoolCode: schoolCode.trim(),
+        schoolCode: school.school_code,
+        schoolName: school.school_name,
         grade: Number(grade),
         classNo: Number(classNo),
         guardianConsent: consent,
@@ -68,15 +70,12 @@ export function OnboardingGate({ children }) {
                 style={{ display: 'block', width: '100%', marginTop: 4, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
               />
             </label>
-            <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>
-              학교 코드
-              <input
-                value={schoolCode}
-                placeholder="예: SC12345"
-                onChange={(e) => setSchoolCode(e.target.value)}
-                style={{ display: 'block', width: '100%', marginTop: 4, border: '1.5px solid var(--cream-border-strong)', borderRadius: 10, padding: '10px 12px', fontSize: 14 }}
-              />
-            </label>
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)', display: 'block', marginBottom: 4 }}>
+                학교
+              </label>
+              <SchoolSearchField selected={school} onSelect={setSchool} />
+            </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <label style={{ flex: 1, fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>
                 학년

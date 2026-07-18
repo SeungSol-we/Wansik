@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     # 급식 Open API (TBD, 8장 참고)
     school_meal_api_key: str = ""
     school_meal_api_base_url: str = ""
+    # 나이스 학교 검색(학교명 -> SD_SCHUL_CODE). school_meal_api_key 를 그대로 재사용한다.
+    school_info_api_base_url: str = "https://open.neis.go.kr/hub/schoolInfo"
 
     # 주간 리포트 태그 최소 등장 임계값 (5.1.5)
     default_tag_frequency_threshold: int = 3

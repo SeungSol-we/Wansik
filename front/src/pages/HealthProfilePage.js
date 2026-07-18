@@ -31,7 +31,7 @@ function ChipToggleGroup({ options, selected, onToggle }) {
 }
 
 export default function HealthProfilePage() {
-  const { nickname, schoolCode, grade, classNo } = useUserStore();
+  const { nickname, schoolName, grade, classNo } = useUserStore();
   const { data, isLoading } = useHealthProfile();
   const saveProfile = useSaveHealthProfile();
 
@@ -86,8 +86,8 @@ export default function HealthProfilePage() {
               <span>{nickname}</span>
             </li>
             <li className="row-item">
-              <span className="row-label">학교 코드</span>
-              <span>{schoolCode || '-'}</span>
+              <span className="row-label">학교</span>
+              <span>{schoolName || '-'}</span>
             </li>
             <li className="row-item">
               <span className="row-label">학년 / 반</span>

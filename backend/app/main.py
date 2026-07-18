@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.db import close_client, ensure_indexes
 from app.repositories.analysis_repo import list_active_user_ids
 from app.repositories.school_meal_repo import seed_default_rules
-from app.routers import analysis, auth, foods, health_profile, meals, school_meals
+from app.routers import analysis, auth, foods, health_profile, meals, school_meals, schools
 from app.services.school_meal_sync import sync_all_schools_for_date
 
 scheduler = AsyncIOScheduler()
@@ -68,6 +68,7 @@ app.include_router(school_meals.router)
 app.include_router(meals.router)
 app.include_router(analysis.router)
 app.include_router(foods.router)
+app.include_router(schools.router)
 
 
 @app.get("/health")
