@@ -17,5 +17,5 @@ async def detect_and_classify(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="지원하지 않는 이미지 형식입니다.")
 
     image_bytes = await file.read()
-    result = run_pipeline(image_bytes)
+    result = await run_pipeline(image_bytes, file.content_type)
     return result

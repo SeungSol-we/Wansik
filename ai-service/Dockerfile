@@ -1,5 +1,5 @@
-# NGC PyTorch 베이스 이미지 사용 (GPU 필요 시)
-# FROM nvcr.io/nvidia/pytorch:24.05-py3
+# 로컬 GPU 추론(YOLOv8/EfficientNet) 대신 외부 Vision API(OpenAI 등)를 호출하는 구조로
+# 변경되어 GPU/무거운 ML 의존성이 필요 없다. 일반 python 이미지로 충분.
 FROM python:3.11-slim
 
 WORKDIR /app

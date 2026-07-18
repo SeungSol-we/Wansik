@@ -1,6 +1,6 @@
 services:
   frontend:
-    build: ./frontend
+    build: ./front
     ports: ["3000:3000"]
     environment:
       VITE_API_BASE_URL: http://localhost:8000
@@ -21,15 +21,15 @@ services:
   ai-service:
     build: ./ai-service
     ports: ["8100:8100"]
+    env_file: .env
+    environment:
+      VISION_API_KEY: ${VISION_API_KEY}
+      VISION_API_BASE_URL: ${VISION_API_BASE_URL}
+      VISION_MODEL: ${VISION_MODEL}
     volumes:
       - ./ai-service:/app
-    # GPU 사용 시 아래 주석 해제 (8장 TBD: 자체 서버 vs 클라우드 GPU 인스턴스)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           capabilities: [gpu]
+    # 외부 Vision API(OpenAI/NVIDIA NIM 등)를 호출하는 구조로 변경되어
+    # 더 이상 로컬 GPU가 필요하지 않다.
 
   mongo:
     image: mongo:7
