@@ -1,0 +1,50 @@
+:root {
+  /* base palette */
+  --cream-bg: #fbf3e1;
+  --cream-panel: #fdf8ec;
+  --cream-panel-alt: #f6ead0;
+  --cream-border: #e4d3a7;
+  --cream-border-strong: #d4b877;
+
+  --navy-bg: #241c3d;
+  --navy-bg-deep: #1a1430;
+  --navy-panel: #2e2650;
+  --navy-panel-alt: #352c5c;
+  --navy-border: #4a3f73;
+
+  --purple-primary: #8879c4;
+  --purple-primary-soft: #b9aee0;
+  --purple-primary-pale: #d9d2f0;
+  --purple-dark: #2d2350;
+
+  --gold: #d9a441;
+  --gold-light: #eccb7c;
+  --gold-deep: #b5822a;
+
+  --ink: #3a2e52;
+  --ink-soft: #8a7c5e;
+  --cream-text: #f7efd9;
+  --cream-text-dim: #cbc0e6;
+
+  --white: #fffaf0;
+  --red-tag: #e2603a;
+  --red-tag-bg: #fbe3da;
+  --green-tag: #4f9a63;
+  --green-tag-bg: #e2f2e3;
+  --blue-tag: #3e7cb8;
+  --blue-tag-bg: #e2eef8;
+  --pink-cheek: #f3b6c0;
+
+  --shadow-soft: 0 8px 24px rgba(45, 35, 80, 0.12);
+  --shadow-dark: 0 10px 30px rgba(10, 6, 26, 0.45);
+
+  --font-display: 'Gaegu', 'Noto Sans KR', sans-serif;
+  --font-body: 'Noto Sans KR', sans-serif;
+
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+
+  --app-max-width: 430px;
+}
